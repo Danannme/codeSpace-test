@@ -8,8 +8,29 @@ export const productApi = createApi({
     baseQuery: fetchBaseQuery({ baseUrl: "https://dummyjson.com" }),
     endpoints: (builder) => ({
         // for fetching products
-        getProducts: builder.query<Product[], void>({
-            query: () => "/products",
+        getProducts: builder.query<
+            {
+                limit: number;
+                products: Product[];
+                skip: number;
+                total: number;
+            },
+            { limit: number; skip: number }
+        >({
+            query: ({ limit, skip }) => `/products?limit=${limit}&skip=${skip}`,
+        }),
+
+        // for fetching product by search
+        getProductsbySearch: builder.query<
+            {
+                limit: number;
+                products: Product[];
+                skip: number;
+                total: number;
+            },
+            string
+        >({
+            query: (querySearch) => `/products/search?q=${querySearch}`,
         }),
 
         // for fetching single product
@@ -28,4 +49,5 @@ export const {
     useGetProductsQuery,
     useGetProductQuery,
     useGetCategoriesQuery,
+    useGetProductsbySearchQuery,
 } = productApi;

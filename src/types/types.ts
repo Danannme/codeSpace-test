@@ -25,6 +25,7 @@ export interface Meta {
 }
 
 export interface Product {
+    mockId: number;
     id: number;
     title: string;
     description: string;
@@ -50,7 +51,27 @@ export interface Product {
 }
 
 export interface Category {
-    slug: string;
     name: string;
-    url: string;
+    icon: React.ReactNode;
+}
+
+export interface LoaderData {
+    user: User;
+    cart: Cart[];
+    products: {
+        limit: number;
+        products: Product[];
+        skip: number;
+        total: number;
+    };
+    wishlist: Product[];
+}
+
+export interface Cart {
+    mockId: number;
+    id: string;
+    userId: string;
+    product: Product;
+    selected: boolean;
+    quantity: number;
 }

@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 // components
 import { Input } from "./components/ui/input";
 import { Button } from "./components/ui/button";
@@ -13,12 +15,18 @@ import {
     SidebarProvider,
     SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Badge } from "./components/ui/badge";
+import { Footer2 } from "./components/footer2";
+
+// toast
+import { Toaster } from "sonner";
 
 // types
 import type { FormEvent } from "react";
+import type { LoaderData } from "./types/types";
 
 // react router
-import { Outlet, Link, useLocation } from "react-router";
+import { Outlet, Link, useLocation, useLoaderData } from "react-router";
 
 // icons
 import { Search, Heart, ShoppingCart, User } from "lucide-react";
@@ -43,28 +51,26 @@ const navbarLink = {
             url: "",
         },
     ],
-    userLink: [
-        {
-            title: "Wishlist",
-            url: "/wishlist",
-            icon: <Heart />,
-        },
-        {
-            title: "Cart",
-            url: "/cart",
-            icon: <ShoppingCart />,
-        },
-        {
-            title: "User",
-            url: "/user",
-            icon: <User />,
-        },
-    ],
 };
 
+// scroll to top after change page
+export function ScrollToTop() {
+    const { pathname } = useLocation();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pathname]);
+
+    return null;
+}
+
 function App() {
+    // get url location / path
     const location = useLocation();
     const breadcrumbPathname = location.pathname.split("/").filter(Boolean);
+    const [searchInput, setSearchInput] = useState("");
+
+    const data = useLoaderData() as LoaderData;
 
     function handleSearch(e: FormEvent) {
         e.preventDefault();
@@ -72,6 +78,8 @@ function App() {
 
     return (
         <>
+            <ScrollToTop />
+            <Toaster richColors position="top-center" />
             {/* Navigation bar */}
             <SidebarProvider>
                 <AppSidebar
@@ -79,15 +87,16 @@ function App() {
                     pageLink={navbarLink.pageLink}
                 />
                 <SidebarInset>
-                    <header className="flex w-full justify-between items-center px-4 md:px-30 py-4 md:py-6 border-b-2">
+                    <header className="sticky top-0 bg-white flex w-full justify-between items-center px-4 md:px-25 py-4 md:py-6 border-b-2 z-20">
                         {/* logo */}
-                        <Link to={{ pathname: "/" }} className="cursor-pointer">
-                            <h1 className="hidden md:block text-2xl ">
-                                Elmora
-                            </h1>
+                        <Link
+                            to={{ pathname: "/" }}
+                            className="hidden lg:block cursor-pointer"
+                        >
+                            <h1 className=" text-2xl ">Elmora</h1>
                         </Link>
                         {/* another page link */}
-                        <div className="hidden lg:flex gap-10">
+                        <div className="hidden md:flex gap-10">
                             {navbarLink.pageLink.map((page) => (
                                 <Link
                                     to={{ pathname: page.url }}
@@ -109,32 +118,60 @@ function App() {
                                     type="text"
                                     className="border-none shadow-none "
                                     placeholder="e.g. Bag"
+                                    value={searchInput}
+                                    onChange={(e) =>
+                                        setSearchInput(e.target.value)
+                                    }
                                 />
-                                <Button
-                                    variant={"outline"}
-                                    className="bg-transparent border-none shadow-none cursor-pointer"
-                                >
-                                    <Search color="black" />
-                                </Button>
-                            </form>
-                            {/* wishlist & cart link & user*/}
-                            {navbarLink.userLink.map((page) => (
                                 <Link
-                                    to={{ pathname: page.url }}
-                                    key={page.title}
-                                    className="cursor-pointer"
+                                    to={{
+                                        pathname: "/search",
+                                        search: `?q=${searchInput}`,
+                                    }}
                                 >
-                                    {page.icon}
+                                    <Button
+                                        variant={"outline"}
+                                        className="bg-transparent border-none shadow-none cursor-pointer"
+                                    >
+                                        <Search color="black" />
+                                    </Button>
                                 </Link>
-                            ))}
+                            </form>
+                            {/* wishlist */}
+                            <Link
+                                to={{ pathname: "/wishlist" }}
+                                className="relative cursor-pointer"
+                            >
+                                <Heart />
+                                <Badge className="absolute bg-[#007AFF] text-xs px-1 -top-2 -right-2 ">
+                                    {data.wishlist.length ?? "0"}
+                                </Badge>
+                            </Link>
+                            {/* shopping cart */}
+                            <Link
+                                to={{ pathname: "/cart" }}
+                                className="relative cursor-pointer"
+                            >
+                                <ShoppingCart />
+                                <Badge className="absolute bg-[#007AFF] text-xs px-1 -top-2 -right-2 ">
+                                    {data?.cart?.length ?? "0"}
+                                </Badge>
+                            </Link>
+                            {/* profile */}
+                            <Link
+                                to={{ pathname: "/profile" }}
+                                className="relative cursor-pointer"
+                            >
+                                <User />
+                            </Link>
                         </div>
                     </header>
-                    <div className="flex flex-col p-6">
+                    <div className="flex flex-col">
                         {/* breadcrumb / url path */}
                         {breadcrumbPathname.length == 0 ? (
                             <></>
                         ) : (
-                            <Breadcrumb>
+                            <Breadcrumb className="px-10 md:px-20 py-6 md:py-12">
                                 <BreadcrumbList>
                                     <BreadcrumbItem>
                                         <BreadcrumbLink href="/">
@@ -149,7 +186,7 @@ function App() {
                                         return (
                                             <>
                                                 /
-                                                <BreadcrumbItem className="hidden md:block">
+                                                <BreadcrumbItem className="">
                                                     <BreadcrumbLink
                                                         href={pathTo}
                                                     >
@@ -165,6 +202,9 @@ function App() {
 
                         {/* component from react-router */}
                         <Outlet />
+
+                        {/* footer */}
+                        <Footer2 />
                     </div>
                 </SidebarInset>
             </SidebarProvider>

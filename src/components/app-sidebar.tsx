@@ -12,6 +12,7 @@ import {
     SidebarRail,
 } from "@/components/ui/sidebar";
 import { Link } from "react-router";
+import { useSidebar } from "@/components/ui/sidebar";
 
 // This is sample data.
 
@@ -21,6 +22,8 @@ export function AppSidebar({
 }: React.ComponentProps<typeof Sidebar> & {
     pageLink: { title: string; url: string }[];
 }) {
+    const { toggleSidebar } = useSidebar();
+
     return (
         <Sidebar {...props}>
             <SidebarHeader className="py-4.5 px-4 border-b-2">
@@ -40,6 +43,7 @@ export function AppSidebar({
                                         <Link
                                             className="text-[1.1rem]"
                                             to={{ pathname: item.url }}
+                                            onClick={() => toggleSidebar()}
                                         >
                                             {item.title}
                                         </Link>
